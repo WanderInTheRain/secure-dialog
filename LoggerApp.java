@@ -204,3 +204,4 @@ public class LoggerApp {
         System.out.println("Exiting LoggerApp. Goodbye!");
     }
 }
+
