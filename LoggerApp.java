@@ -59,7 +59,7 @@ class Logger {
             logs.append("Title: ").append(entry.getTitle())
                     .append(", \nContent: ").append(entry.getContent())
                     .append(", \nTimestamp: ").append(entry.getTimestamp())
-                    .append("\n");
+                    .append("\n\n");
         }
         return logs.toString();
     }
@@ -152,14 +152,16 @@ class Manager {
 public class LoggerApp {
     public static void main(String[] args) {
         Logger logger = new Logger();
-        Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter password: (password must be 16 char)");
+        // 使用UTF-8字符编码创建Scanner
+        Scanner scanner = new Scanner(System.in, "UTF-8");
+
+        System.out.print("Enter password: (password must be 16 char)\n");
         String inputPassword = scanner.next();
 
         boolean run = true;
 
-        Manager.open(logger,inputPassword);
+        Manager.open(logger, inputPassword);
 
         String cmd;
 
@@ -189,7 +191,7 @@ public class LoggerApp {
 
                 case "quit":
                     run = false;
-                    Manager.save(logger.getLogEntries(),inputPassword);
+                    Manager.save(logger.getLogEntries(), inputPassword);
                     break;
 
                 default:
