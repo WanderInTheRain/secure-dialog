@@ -18,8 +18,8 @@ LoggerApp enables users to securely create, delete, and view log entries. The ap
 
 1. **Clone the Repository:**
     ```bash
-    git clone https://github.com/your-username/LoggerApp.git
-    cd LoggerApp
+    git clone https://github.com/your-username/secure-dialog.git
+    cd secure-dialog
     ```
 
 2. **Run the Precompiled Application:**
