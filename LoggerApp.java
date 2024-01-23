@@ -171,16 +171,18 @@ public class LoggerApp {
 
             switch (cmd) {
                 case "add":
+                    scanner.nextLine();
                     System.out.print("Title: ");
-                    String title = scanner.next();
+                    String title = scanner.nextLine();
                     System.out.print("Content: ");
-                    String content = scanner.next();
+                    String content = scanner.nextLine();
                     logger.addLogEntry(title, content);
                     break;
 
                 case "delete":
+                    scanner.nextLine();
                     System.out.print("Enter log title to delete: ");
-                    String deleteTitle = scanner.next();
+                    String deleteTitle = scanner.nextLine();
                     logger.deleteLogEntry(deleteTitle);
                     break;
 
