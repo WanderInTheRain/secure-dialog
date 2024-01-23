@@ -1,7 +1,6 @@
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.security.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -76,13 +75,12 @@ class Logger {
 
 class Manager {
     private static final String ENCRYPTION_ALGORITHM = "AES";
-    private static final String SECRET_KEY = "your_secret_key1"; // Replace with a strong password
     private static final String LOG_FILE_NAME = "logs.sec";
 
-    private static byte[] encryptLogs(ArrayList<LogEntry> logs) {
+    private static byte[] encryptLogs(ArrayList<LogEntry> logs,String inputPassword) {
         try {
             Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
-            SecretKeySpec secretKey = new SecretKeySpec(SECRET_KEY.getBytes(), ENCRYPTION_ALGORITHM);
+            SecretKeySpec secretKey = new SecretKeySpec(inputPassword.getBytes(), ENCRYPTION_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -99,10 +97,10 @@ class Manager {
 
     // Decrypts a byte array into a list of log entries
     @SuppressWarnings("unchecked")
-    private static ArrayList<LogEntry> decryptLogs(byte[] encryptedLogs) {
+    private static ArrayList<LogEntry> decryptLogs(byte[] encryptedLogs,String inputPassword) {
         try {
             Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
-            SecretKeySpec secretKey = new SecretKeySpec(SECRET_KEY.getBytes(), ENCRYPTION_ALGORITHM);
+            SecretKeySpec secretKey = new SecretKeySpec(inputPassword.getBytes(), ENCRYPTION_ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
 
             byte[] decryptedBytes = cipher.doFinal(encryptedLogs);
@@ -117,42 +115,31 @@ class Manager {
         }
     }
 
-    public static boolean authenticate(Scanner scanner) {
-        boolean run = false;
-        System.out.print("Enter password: ");
-        String inputPassword = scanner.next();
-        if (inputPassword.equals(SECRET_KEY)) {
-            run = true;
-        } else {
-            System.out.println("Wrong password. Exiting.");
-        }
-        return run;
-    }
 
-    public static void open(Logger logger) {
-        ArrayList<LogEntry> loadedLogs = fileOpen();
+    public static void open(Logger logger,String inputPassword) {
+        ArrayList<LogEntry> loadedLogs = fileOpen(inputPassword);
         logger.addAllLogs(loadedLogs);
     }
 
-    public static void save(ArrayList<LogEntry> logs) {
-        fileSave(logs);
+    public static void save(ArrayList<LogEntry> logs,String inputPassword) {
+        fileSave(logs,inputPassword);
         System.out.println("Logs saved successfully.");
     }
 
-    private static void fileSave(ArrayList<LogEntry> logs) {
+    private static void fileSave(ArrayList<LogEntry> logs,String inputPassword) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(LOG_FILE_NAME))) {
-            byte[] encryptedLogs = encryptLogs(logs);
+            byte[] encryptedLogs = encryptLogs(logs,inputPassword);
             oos.writeObject(encryptedLogs);
         } catch (IOException e) {
             System.out.println("Error saving logs to file: " + e.getMessage());
         }
     }
 
-    private static ArrayList<LogEntry> fileOpen() {
+    private static ArrayList<LogEntry> fileOpen(String inputPassword) {
         ArrayList<LogEntry> loadedLogs = new ArrayList<>();
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(LOG_FILE_NAME))) {
             byte[] encryptedLogs = (byte[]) ois.readObject();
-            loadedLogs = decryptLogs(encryptedLogs);
+            loadedLogs = decryptLogs(encryptedLogs,inputPassword);
         } catch (FileNotFoundException e) {
             System.out.println("Log file not found. Creating a new one.");
         } catch (IOException | ClassNotFoundException e) {
@@ -167,11 +154,12 @@ public class LoggerApp {
         Logger logger = new Logger();
         Scanner scanner = new Scanner(System.in);
 
-        boolean run = Manager.authenticate(scanner);
+        System.out.print("Enter password: (password must be 16 char)");
+        String inputPassword = scanner.next();
 
-        if (run) {
-            Manager.open(logger);
-        }
+        boolean run = true;
+
+        Manager.open(logger,inputPassword);
 
         String cmd;
 
@@ -201,7 +189,7 @@ public class LoggerApp {
 
                 case "quit":
                     run = false;
-                    Manager.save(logger.getLogEntries());
+                    Manager.save(logger.getLogEntries(),inputPassword);
                     break;
 
                 default:
